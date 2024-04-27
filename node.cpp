@@ -26,7 +26,7 @@ Node cp(vector <puntosbd> puntos){
         // retornar un arbol(NODE) con los puntos transformados como atributo
     }
     else{
-        
+        //Seleccionar de forma aleatoria.
 
 
     }
