@@ -80,17 +80,17 @@ puntosbd search_key_closest(puntosbd tup, vector<puntosbd> l){
 // Recibe los pivotes k random y todos los puntos, retornando un diccionario en que cada llave 
 // corresponde a un pivote de los k random y su valor a un vector con los puntos en que su distancia
 // euclidiana es menor respecto al resto de pivotes.
-map <puntosbd, vector<puntosbd>> point_assign(vector<puntosbd> rand_points, vector<puntosbd> points){
+map <puntosbd, vector<puntosbd>> point_assign(const vector<puntosbd> &rand_points, const vector<puntosbd> &points){
     map <puntosbd, vector<puntosbd>> pivot_dict;
-    int k_length = rand_points.size();
-    int p_length = points.size();
+    //int k_length = rand_points.size();
+    //int p_length = points.size();
     //vector<puntosbd> vec = NULL;
-    for (int i = 0; i < k_length; i++){
-      pivot_dict[rand_points[i]] = vector<puntosbd>();//listavacia;
+    for (const auto &pivote : rand_points){
+      pivot_dict[pivote] = vector<puntosbd>();//listavacia;
     }
-    for (int j = 0; j < p_length; j++){
-      puntosbd key_dict = search_key_closest(points[j],rand_points);
-      pivot_dict[key_dict].push_back(points[j]);
+    for (const auto &punto : points){
+      puntosbd key_dict = search_key_closest(punto,rand_points);
+      pivot_dict[key_dict].push_back(punto);
     }
     return pivot_dict;
 }
@@ -146,7 +146,7 @@ Node cp(vector <puntosbd> puntos){
 }
 
 int main(){
-	//srand(time(0)); //semilla para reiniciar los valores aleatorios
+	srand(time(0)); //semilla para reiniciar los valores aleatorios
 	vector<puntosbd> puntos_test;
 	for (int i = 0; i < 10; ++i) {
         puntosbd punto(i * 1.0, i * 1.0); //crea puntos con coordenadas (0,0), (1,1), (2,2), ...
@@ -169,7 +169,17 @@ int main(){
     cout << "El punto más cercano de "<<"(" << get<0>(puntos_test[i]) << ", " << get<1>(puntos_test[i]) << ")" <<" es:" << endl;
     cout << "(" << get<0>(punto_closest) << ", " << get<1>(punto_closest) << ")" << endl;
     
-    //map <puntosbd, vector<puntosbd>> dic_assign = point_assign(puntos_test, k_randoms);
+    map <puntosbd, vector<puntosbd>> dic_assign = point_assign(k_randoms, puntos_test);
+    
+    for (const auto &par : dic_assign) {
+        cout << "Pivote: (" << get<0>(par.first) << ", " << get<1>(par.first) << ")" << endl;
+        cout << "Puntos asignados:";
+        for (const auto &punto : par.second) {
+            cout << " (" << get<0>(punto) << ", " << get<1>(punto) << ")";
+        }
+        cout << endl;
+    }
+
  
     return 0;
 }
