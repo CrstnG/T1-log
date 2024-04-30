@@ -12,7 +12,7 @@
 
 using namespace std;
 
-int B = 500;
+int B = 3;
 
 
 double euc_distance(const puntosbd& p1, const puntosbd& p2) {
@@ -156,7 +156,7 @@ int main(){
     for (const auto& punto : puntos_test) {
         cout << "(" << get<0>(punto) << ", " << get<1>(punto) << ")" << endl;
     }
-    int indice = puntos_test.size(); //solo printeoe l tamaño del vector de puntos
+    int indice = puntos_test.size(); //solo printeo  el tamaño del vector de puntos
     cout << "Tamaño de puntos_test:" << endl;
     cout << indice << endl;
     cout << "Los k_random son:" << endl;
@@ -173,6 +173,17 @@ int main(){
     
     for (const auto &par : dic_assign) {
         cout << "Pivote: (" << get<0>(par.first) << ", " << get<1>(par.first) << ")" << endl;
+        cout << "Puntos asignados:";
+        for (const auto &punto : par.second) {
+            cout << " (" << get<0>(punto) << ", " << get<1>(punto) << ")";
+        }
+        cout << endl;
+    }
+    
+    cout << "redistribution prueba::" << endl;
+    map <puntosbd, vector<puntosbd>> dic_dist = redistribution(puntos_test);
+    for (const auto &par : dic_dist) {
+        cout << "Pivote_2: (" << get<0>(par.first) << ", " << get<1>(par.first) << ")" << endl;
         cout << "Puntos asignados:";
         for (const auto &punto : par.second) {
             cout << " (" << get<0>(punto) << ", " << get<1>(punto) << ")";
