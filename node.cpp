@@ -14,6 +14,7 @@ using namespace std;
 
 int B = 500;
 
+
 double euc_distance(const puntosbd& p1, const puntosbd& p2) {
     double dx = get<0>(p1) - get<0>(p2);
     double dy = get<1>(p1) - get<0>(p2);
@@ -51,12 +52,13 @@ Node to_node(vector <puntosbd> points){
 // Retorna un vector con k tuplas random
 vector <puntosbd> random_p(vector <puntosbd> p,int k){
     vector <puntosbd> k_random;
-    int length = p.size();
-    for (int i = 0; i < k; i++){
-        int index = rand()%length+1;
+    //int length = p.size();
+    while (k > 0 && !p.empty()){
+        int index = rand()% p.size(); //p.size es suficiente dado a que vamos variando el tamaño de p
         puntosbd r_tuple = p[index];
         k_random.push_back(r_tuple);
         p.erase(p.begin()+index);
+        k--;
     }
     return k_random;
 }
@@ -140,9 +142,34 @@ Node cp(vector <puntosbd> puntos){
         }
         
     }
+    return Node();
 }
 
 int main(){
-    cout << "hello" << endl;
+	//srand(time(0)); //semilla para reiniciar los valores aleatorios
+	vector<puntosbd> puntos_test;
+	for (int i = 0; i < 10; ++i) {
+        puntosbd punto(i * 1.0, i * 1.0); //crea puntos con coordenadas (0,0), (1,1), (2,2), ...
+        puntos_test.push_back(punto);
+    }
+    cout << "Los 10 puntos_test son:" << endl;
+    for (const auto& punto : puntos_test) {
+        cout << "(" << get<0>(punto) << ", " << get<1>(punto) << ")" << endl;
+    }
+    int indice = puntos_test.size(); //solo printeoe l tamaño del vector de puntos
+    cout << "Tamaño de puntos_test:" << endl;
+    cout << indice << endl;
+    cout << "Los k_random son:" << endl;
+    vector<puntosbd> k_randoms = random_p(puntos_test, 2); //pruebo que elija los k puntos al azar;
+    for (const auto& punto_r : k_randoms) { //printeo los puntos elegidos
+        cout << "(" << get<0>(punto_r) << ", " << get<1>(punto_r) << ")" << endl;
+    }
+    int i = 2;
+    puntosbd punto_closest = search_key_closest(puntos_test[i], k_randoms);
+    cout << "El punto más cercano de "<<"(" << get<0>(puntos_test[i]) << ", " << get<1>(puntos_test[i]) << ")" <<" es:" << endl;
+    cout << "(" << get<0>(punto_closest) << ", " << get<1>(punto_closest) << ")" << endl;
     
+    //map <puntosbd, vector<puntosbd>> dic_assign = point_assign(puntos_test, k_randoms);
+ 
+    return 0;
 }
