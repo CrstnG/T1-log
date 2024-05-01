@@ -28,9 +28,9 @@ struct PointR{
 };
 
 struct Node{
-  vector<PointR>keys;
-  vector <Node*> child;
-  bool is_leaf;
+  vector<puntosbd>keys;
+  vector <Node*> childs;
+  bool is_leaf = false;
   int height;
 };
 
@@ -38,10 +38,11 @@ struct Node{
 Node to_node(vector <puntosbd> points){
     Node n;
     for (int i=0;i < points.size();i++){
-        PointR v;
-        v.x = get<0>(points[i]);
-        v.y = get<1>(points[i]);
-        v.cr = 0.0;
+        //PointR v;
+        //v.x = get<0>(points[i]);
+        //v.y = get<1>(points[i]);
+        //v.cr = 0.0;
+        puntosbd v = points[i];
         n.keys.push_back(v);
         n.child.push_back(NULL);
         n.is_leaf = true;
@@ -125,11 +126,22 @@ map <puntosbd, vector<puntosbd>> redistribution(vector <puntosbd> puntos){
     }
     return k_conjuntos;
 }
+vector <puntosbd> get_F(map <puntosbd, vector<puntosbd>> k_sets){
+   vector <puntosbd> rd_points;
+   for (const auto &par : k_sets){
+      rd_points.push_back(par.first);
+   }
+   return rd_points;
+}
+//double get_max_euclidean(puntosbd tup, vector<puntosbd> list_nodes){
+    
+//}
 
 Node cp(vector <puntosbd> puntos){
     // estimar B y b
     int b = 0.5*B;
     int n = puntos.size();
+    Node dummy;
     if (puntos.size() <= B){
         // retornar un arbol(NODE) con los puntos transformados como atributo
         Node t = to_node(puntos);
@@ -140,16 +152,27 @@ Node cp(vector <puntosbd> puntos){
         while (conjuntos_k.size() == 1){
             conjuntos_k = redistribution(puntos);
         }
-        
+        vector <puntosbd> conjunto_F = get_F(conjuntos_k);
+        Node root;
+        root.keys = conjunto_F;
+        root.height = 0;
+        vector <Node*> tree_T_j;
+        for (const auto &par : conjuntos_k){  //paso 6
+            Node* child = &cp(par.second);;
+            child->height += 1;
+            tree_T_j.push_back(&cp(par.second));
+        }
+        root.childs = tree_T_j;
+
     }
-    return Node();
+    return dummy;
 }
 
 int main(){
 	srand(time(0)); //semilla para reiniciar los valores aleatorios
 	vector<puntosbd> puntos_test;
 	for (int i = 0; i < 10; ++i) {
-        puntosbd punto(i * 1.0, i * 1.0); //crea puntos con coordenadas (0,0), (1,1), (2,2), ...
+        puntosbd punto(i * 1.0, i * 1.0,0.0); //crea puntos con coordenadas (0,0), (1,1), (2,2), ...
         puntos_test.push_back(punto);
     }
     cout << "Los 10 puntos_test son:" << endl;
