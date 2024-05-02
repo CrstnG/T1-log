@@ -8,6 +8,7 @@
 #include <iostream>
 using namespace std;
 
+
 puntosbd generarPuntoAleatorio() {
     static random_device rd;
     static mt19937 gen(rd());
@@ -37,7 +38,7 @@ vector<puntosbd> generarPuntosAleatoriosUnicos(int N) {
 }
 
 int main() {
-    int N = pow(2,25); // Cantidad de puntos aleatorios a generar
+    int N = pow(2,18); // Cantidad de puntos aleatorios a generar
     vector<puntosbd> puntos = generarPuntosAleatoriosUnicos(N);
     puntosbd punto = puntos[5];
     // Imprimir los puntos generados

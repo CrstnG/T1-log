@@ -3,7 +3,8 @@
 #include <array>
 #include <vector>
 using namespace std;
-typedef tuple <double, double,double > puntosbd;
+
+typedef tuple <double, double, double> puntosbd;
 //typedef tuple <puntosbd, double, Node *> entry;
 
 double euclideanDistance(const puntosbd& p1, const puntosbd& p2) {

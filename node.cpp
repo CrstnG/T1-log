@@ -14,22 +14,19 @@ using namespace std;
 
 int B = 3;
 
-
 double euc_distance(const puntosbd& p1, const puntosbd& p2) {
     double dx = get<0>(p1) - get<0>(p2);
     double dy = get<1>(p1) - get<0>(p2);
     return sqrt(dx * dx + dy * dy);
 }
-
-struct PointR{
-    double x;
-    double y;
-    double cr;
+struct Entry{
+  puntosbd point;
+  double cr;
+  Node* child;
 };
 
 struct Node{
-  vector<puntosbd>keys;
-  vector <Node*> childs;
+  vector<Entry> keys;
   bool is_leaf = false;
   int height;
 };
@@ -38,13 +35,9 @@ struct Node{
 Node to_node(vector <puntosbd> points){
     Node n;
     for (int i=0;i < points.size();i++){
-        //PointR v;
-        //v.x = get<0>(points[i]);
-        //v.y = get<1>(points[i]);
-        //v.cr = 0.0;
         puntosbd v = points[i];
-        n.keys.push_back(v);
-        n.child.push_back(NULL);
+        Entry e = {v,0.0,NULL};
+        n.keys.push_back(e);
         n.is_leaf = true;
         n.height = 0;
     }
@@ -136,7 +129,69 @@ vector <puntosbd> get_F(map <puntosbd, vector<puntosbd>> k_sets){
 //double get_max_euclidean(puntosbd tup, vector<puntosbd> list_nodes){
     
 //}
+//Función que guarda los puntos, recibe un connjunto de entrys. Rescata los  puntosbd de cada
+//entry y los guarda en el vector points.
+//Se usa en el punto 7.
+vector <puntosbd> save_points(vector<Entry> entries){
+  vector <puntosbd> points;
+  //int entries_length = entries.size();
+  for (const auto &entradas : entries){
+    points.push_back(entradas.point);
+  }
+  return points;
+}
 
+//Función que guarda los arboles hijos, recibe un conjunto de entrys.
+//Rescata los punteros de los aárboles hijos de cada entry y los guarda en el vector ptr_trees
+vector <Node*> save_treesptr(vector<Entry> entries){
+  vector <Node*> ptr_trees;
+  //int entries_length = entries.size();
+  for (const auto &entradas : entries){
+    ptr_trees.push_back(entradas.child);
+  }
+  return ptr_trees;
+}
+
+//Función que calcula la altura de los árboles
+int height(Node* tree){
+    int tree_height = 0;
+    if (tree->is_leaf == true){
+        return tree_height;
+    }
+    else{
+        int altura = 1 + height(tree->keys[0].child);
+        tree->height = altura;
+        //return 1 + height(tree->keys[0].child);
+        return altura;
+    }
+}
+//funcion que busca el sub-árbol con altura h
+//recibe un puntero a un tree con una altura inicial j, y va  bajando en el árbol hasta encontrar con 
+//un sub-árbol de altura h.
+Node* search_h_height(Node* tree,int j,int h){
+    if (j == h){
+        return tree;
+    }
+    else{
+        return search_h_height(tree->keys[0].child,j-1,h);
+    }
+    
+}
+
+//función que inserta los T_j en T_sup
+//recibe el T_sup y un Nodo.
+Node insert_tj_en_tsup(Node tsup, Node* tj){
+    if(tsup.is_leaf == true){
+
+    }
+    else{
+        //for tsup.keys
+         //if  entry == tj->point
+           
+    }
+}
+
+//Constructor de M-Trees con el método de Ciacca-Patella.
 Node cp(vector <puntosbd> puntos){
     // estimar B y b
     int b = 0.5*B;
@@ -153,17 +208,56 @@ Node cp(vector <puntosbd> puntos){
             conjuntos_k = redistribution(puntos);
         }
         vector <puntosbd> conjunto_F = get_F(conjuntos_k);
-        Node root;
-        root.keys = conjunto_F;
-        root.height = 0;
         vector <Node*> tree_T_j;
         for (const auto &par : conjuntos_k){  //paso 6
-            Node* child = &cp(par.second);;
-            child->height += 1;
+            Node* child = &cp(par.second);
             tree_T_j.push_back(&cp(par.second));
         }
-        root.childs = tree_T_j;
-
+        int tree_T_j_length = tree_T_j.size();     //paso 7
+        for (int i = 0; i < tree_T_j_length; i++){
+            if (tree_T_j[i]->keys.size() < b){
+                conjunto_F.erase(conjunto_F.begin() + i); //Eliminamos pf_j de F
+                vector <puntosbd> entries = save_points(tree_T_j[i]->keys);
+                for (const auto &new_entrada : entries){   // añadimos puntos al conjunto F
+                  conjunto_F.push_back(new_entrada);
+                }
+                vector <Node*> tree_entries = save_treesptr(tree_T_j[i]->keys);
+                for (const auto &new_entr : tree_entries){ //añadimos los sub arboles a tree_T_j
+                  tree_T_j.push_back(new_entr);
+                }     
+                tree_T_j.erase(tree_T_j.begin() + i); //eliminamos la raíz.
+                
+            
+            }
+        }
+        int h; // nuestra altura minima
+        //vector<Node> T_v;
+        //tree_T_j_length = tree_T_j.size();
+        vector <int> heights;
+        for (const auto &tree : tree_T_j){
+            int tmp_height = height(tree);
+            heights.push_back(tmp_height);
+        }
+        auto min_iter = min_element(heights.begin(), heights.end());
+        h = *min_iter;
+        tree_T_j_length = tree_T_j.size();
+        vector <Node*> T_prim;
+        for (int j = 0; j < tree_T_j_length; j++){ // Punto 9
+           if(tree_T_j[j]->height == h){
+             T_prim.push_back(tree_T_j[j]);
+           }
+           else{
+             conjunto_F.erase(conjunto_F.begin() + j); //eliminamos el punto pertinente en F
+             Node* sub_node_h = search_h_height(tree_T_j[j],tree_T_j[j]->height,h);
+             vector <Entry> sub_node_h_entries = sub_node_h->keys;
+             for (const auto &sub_nod_entr : sub_node_h_entries){ //añadimos los sub arboles a tree_T_j
+                  conjunto_F.push_back(sub_nod_entr.point);
+                  tree_T_j.push_back(sub_nod_entr.child);
+             }     
+           }
+        }
+        Node t_sup = cp(conjunto_F);
+       
     }
     return dummy;
 }
@@ -217,3 +311,16 @@ int main(){
  
     return 0;
 }
+
+//struct entrada{
+    //puntosbd puntos:
+    //double rc;
+    //*Node hijo;
+//}
+//struct Node{
+  //vector <entradas> entradas;
+//}
+//aaaaaaaaa
+Node Arbol_1();
+
+Node Arbol_2 = [((1,2), 10, &Arbol_3)), ((1,3), 11, &Arbol_4))]
