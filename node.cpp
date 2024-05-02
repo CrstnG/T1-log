@@ -88,7 +88,7 @@ map <puntosbd, vector<puntosbd>> point_assign(const vector<puntosbd> &rand_point
     }
     return pivot_dict;
 }
-
+//función de redistribución (Punto 4).
 map <puntosbd, vector<puntosbd>> redistribution(vector <puntosbd> puntos){
     // estimar B y b){
     int b = 0.5*B;
@@ -126,9 +126,6 @@ vector <puntosbd> get_F(map <puntosbd, vector<puntosbd>> k_sets){
    }
    return rd_points;
 }
-//double get_max_euclidean(puntosbd tup, vector<puntosbd> list_nodes){
-    
-//}
 //Función que guarda los puntos, recibe un connjunto de entrys. Rescata los  puntosbd de cada
 //entry y los guarda en el vector points.
 //Se usa en el punto 7.
@@ -140,7 +137,6 @@ vector <puntosbd> save_points(vector<Entry> entries){
   }
   return points;
 }
-
 //Función que guarda los arboles hijos, recibe un conjunto de entrys.
 //Rescata los punteros de los aárboles hijos de cada entry y los guarda en el vector ptr_trees
 vector <Node*> save_treesptr(vector<Entry> entries){
@@ -178,16 +174,61 @@ Node* search_h_height(Node* tree,int j,int h){
     
 }
 
-//función que inserta los T_j en T_sup
-//recibe el T_sup y un Nodo.
-Node insert_tj_en_tsup(Node tsup, Node* tj){
-    if(tsup.is_leaf == true){
-
+//función que inserta un T_j en T_sup
+//recibe el puntero a T_sup y un puntero a un Nodo.
+void insert_tj_en_tsup(Node* tsup, Node* tj){
+    vector<Entry> tsup_entry = tsup->keys;
+    vector <Entry> tj_entry = tj -> keys;
+    if(tsup->is_leaf == true){
+        for (const auto &entry : tsup_entry){
+          if (get<0>(entry.point) == get<0> (tj_entry[0].point) and get<1>(entry.point) == get<1> (tj_entry[0].point)){
+            entry.child == tj;
+            tsup->is_leaf == false;
+            return;
+          }
+        }
     }
     else{
-        //for tsup.keys
-         //if  entry == tj->point
-           
+        for (const auto &entry : tsup_entry){
+            if(get<0>(entry.point) == get<0> (tj_entry[0].point) and get<1>(entry.point) == get<1> (tj_entry[0].point)){
+                insert_tj_en_tsup(entry.child,tj); 
+            }
+        }   
+    }
+}
+
+//Recibe el puntero a T_sup y reciba la lista de punteros Nodos(trees)
+//aplica la función insert_tj_en_tsup para insertar todos los T_j en T_sup.
+void insert_all_tjs_en_tsup(Node* tsup, vector <Node*> tjs){
+   for (const auto &t_j_s : tjs){
+     insert_tj_en_tsup(tsup,t_j_s);
+   } 
+}
+
+double get_max_cr(puntosbd point,Node* sub_tree){
+   set <double> cr_s; //cr_s.insert()cr
+   for (const auto &entry : sub_tree->keys){
+      cr_s.insert(euc_distance(point, entry.point));
+   }
+   auto it = cr_s.rbegin(); //iterador al último elemento
+   double cr = *it; //elijo mi último elemento
+   return cr; //retorno mi cr
+}
+
+//Recibe un árbol con radios covertores = 0.
+//Setea los radios covertores según corresponda.
+void set_cr(Node* t_sup){
+    if(t_sup->is_leaf){
+        return;
+    }
+    else{
+        //por cada entrada de las entradas (keys) de t_sup
+        for (auto &entry : t_sup->keys){
+            entry.cr = get_max_cr(entry.point,entry.child);
+        }
+        for (auto &entradas : t_sup->keys){
+            set_cr(entradas.child);
+        }
     }
 }
 
@@ -196,7 +237,6 @@ Node cp(vector <puntosbd> puntos){
     // estimar B y b
     int b = 0.5*B;
     int n = puntos.size();
-    Node dummy;
     if (puntos.size() <= B){
         // retornar un arbol(NODE) con los puntos transformados como atributo
         Node t = to_node(puntos);
@@ -226,13 +266,9 @@ Node cp(vector <puntosbd> puntos){
                   tree_T_j.push_back(new_entr);
                 }     
                 tree_T_j.erase(tree_T_j.begin() + i); //eliminamos la raíz.
-                
-            
             }
         }
         int h; // nuestra altura minima
-        //vector<Node> T_v;
-        //tree_T_j_length = tree_T_j.size();
         vector <int> heights;
         for (const auto &tree : tree_T_j){
             int tmp_height = height(tree);
@@ -256,17 +292,18 @@ Node cp(vector <puntosbd> puntos){
              }     
            }
         }
-        Node t_sup = cp(conjunto_F);
-       
+        Node t_sup = cp(conjunto_F); 
+        insert_all_tjs_en_tsup(&t_sup,tree_T_j); //paso 11 algoritmo cp
+        set_cr(&t_sup); //paso 12
+        return t_sup;
     }
-    return dummy;
 }
 
 int main(){
 	srand(time(0)); //semilla para reiniciar los valores aleatorios
 	vector<puntosbd> puntos_test;
 	for (int i = 0; i < 10; ++i) {
-        puntosbd punto(i * 1.0, i * 1.0,0.0); //crea puntos con coordenadas (0,0), (1,1), (2,2), ...
+        puntosbd punto(i * 1.0, i * 1.0); //crea puntos con coordenadas (0,0), (1,1), (2,2), ...
         puntos_test.push_back(punto);
     }
     cout << "Los 10 puntos_test son:" << endl;
@@ -311,16 +348,3 @@ int main(){
  
     return 0;
 }
-
-//struct entrada{
-    //puntosbd puntos:
-    //double rc;
-    //*Node hijo;
-//}
-//struct Node{
-  //vector <entradas> entradas;
-//}
-//aaaaaaaaa
-Node Arbol_1();
-
-Node Arbol_2 = [((1,2), 10, &Arbol_3)), ((1,3), 11, &Arbol_4))]
