@@ -6,17 +6,17 @@ using namespace std;
 
 typedef tuple <double, double>puntosbd;
 //typedef tuple <puntosbd, double, Node *> entry;
+struct Entry{
+  puntosbd point;
+  double cr;
+  Node* child;
+};
 
-double euclideanDistance(const puntosbd& p1, const puntosbd& p2) {
-    double dx = get<0>(p1) - get<0>(p2);
-    double dy = get<1>(p1) - get<0>(p2);
-    return sqrt(dx * dx + dy * dy);
-}
+struct Node{
+  vector<Entry> keys;
+  bool is_leaf = false;
+  int height;
+};
 
-//class Node{
-  //  public:
-    //  vector <entry> v;
-      //bool is_leaf = false;
-      //int accesor = 0;
-//};
+
 
