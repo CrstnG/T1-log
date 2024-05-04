@@ -6,6 +6,9 @@ using namespace std;
 
 typedef tuple <double, double>puntosbd;
 //typedef tuple <puntosbd, double, Node *> entry;
+
+struct Node;
+
 struct Entry{
   puntosbd point;
   double cr;
@@ -17,6 +20,8 @@ struct Node{
   bool is_leaf = false;
   int height;
 };
+
+
 
 
 
