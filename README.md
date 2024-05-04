@@ -8,5 +8,5 @@ La tarea consiste en la implementación de un M-Tree, que es un método de acces
 
 ### Integrantes del grupo:
 - Cristián ...
-- Cristián
-- Iván Salas
+- Cristián Romero V.
+- Iván Salas Aedo.
