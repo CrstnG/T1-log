@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.s": "ca65",
         "vector": "cpp",
         "tuple": "cpp",
         "array": "cpp",
@@ -8,6 +9,7 @@
         "string": "cpp",
         "iostream": "cpp",
         "ostream": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "random": "cpp"
     }
 }
