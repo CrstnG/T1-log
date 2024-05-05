@@ -63,9 +63,17 @@ vector <puntosbd> search_tree(Node* mtree,tuple <puntosbd, double> q){
 
 int main(){
     cout << B << endl;
-    int N = pow(2,10);
+    int N = pow(2,14);
+    
     vector<puntosbd> puntos = generarPuntosAleatoriosUnicos(N);
     cout << "cree los puntos" << endl;
+    cout << "los primeros 50 puntos" << endl;
+
+    for (int i = 0; i < 10; i++){
+        double x = get<0>(puntos[i]);
+        double y = get<1>(puntos[i]);
+        cout << "Las coordenadas son: (" << x << ", " << y << ")" << endl;
+    }
     vector<puntosbd> queries = random_q(puntos,100);
     cout << "empeze" << endl;
     Node mtree = cp(puntos);
