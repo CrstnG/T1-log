@@ -18,7 +18,7 @@ struct Entry{
 struct Node{
   vector<Entry> keys;
   bool is_leaf = false;
-  int height = -1;
+  int height = 0;
 };
 
 

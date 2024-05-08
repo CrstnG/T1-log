@@ -197,7 +197,7 @@ vector <Node*> save_treesptr(vector<Entry> entries){
 }
 
 //Función que calcula la altura de los árboles
-int height(Node* tree){
+//int height(Node* tree){
     //int tree_height = 0;
     //if (tree->is_leaf == true){
         //cout << "CASO BASE HEIGHT" << endl;
@@ -210,90 +210,161 @@ int height(Node* tree){
         //return 1 + height(tree->keys[0].child);
         //return altura;
     //}
-    if (tree->height == 0){
-        cout << "CASO BASE HEIGHT" << endl;
-        return 0;
-    }
-    else{
-        cout << "CASO RECURSIVO HEIGHT" << endl;
+  //  if (tree->height == 0){
+    //    cout << "CASO BASE HEIGHT" << endl;
+   //     return 0;
+   //
+     // else{
+       // cout << "CASO RECURSIVO HEIGHT" << endl;
         //int altura = 1 + height(tree->keys[0].child);
         //tree->height = altura;
-        tree->height += 2 + height(tree->keys[0].child);
-        int altura  = tree->height;
-        return altura;
-    }
-}
+       // tree->height += 2 + height(tree->keys[0].child);
+       // int altura  = tree->height;
+       // return altura;
+    //}
+//}
 //funcion que busca el sub-árbol con altura h
 //recibe un puntero a un tree con una altura inicial j, y va  bajando en el árbol hasta encontrar con 
 //un sub-árbol de altura h.
-Node* search_h_height(Node* tree,int j,int h){
+tuple<vector <Node*>,vector<puntosbd>> search_h_height(Node* tree,int j,int h,puntosbd p_padre){
+    //if (j == h){
+    //    return tree;
+    //}
+    //else{
+    //    return search_h_height(tree->keys[0].child,j-1,h);
+    //}
+    cout << "ENTRANDO A SEARCH_H_HEIGHT" << endl;
+    cout << j << endl;
+    vector <Node*> tree_h;
+    vector <puntosbd> f_add;
     if (j == h){
-        return tree;
+        cout << "ENTRANDO A SEARCH_H_HEIGHT CASO BASE" << endl;
+        cout << j << endl;
+        f_add.push_back(p_padre);
+        tree_h.push_back(tree);
+        return make_tuple(tree_h,f_add);
     }
     else{
-        return search_h_height(tree->keys[0].child,j-1,h);
+        cout << "ENTRANDO A SEARCH_H_HEIGHT RECURSIVO" << endl;
+        cout << j << endl;
+        for (auto &entries: tree->keys){
+            //tree_h.push_back(search_h_height(entries.child,j-1,h));
+            tuple<vector <Node*>,vector<puntosbd>>  search_child = search_h_height(entries.child,j-1,h,entries.point);
+
+            tree_h.insert(tree_h.end(),get<0>(search_child).begin(), get<0>(search_child).end());
+            f_add.insert(f_add.end(),get<1>(search_child).begin(), get<1>(search_child).end());
+        }
     }
-    
+    return make_tuple(tree_h,f_add);
 }
 
 //función que inserta un T_j en T_sup
 //recibe el puntero a T_sup y un puntero a un Nodo.
-void insert_tj_en_tsup(Node* tsup, Node* tj,puntosbd pfj){ 
-    cout << "Entrando a insert_tj_en_tsup" << endl;
-    vector<Entry> tsup_entry = tsup->keys;
-    cout << "obteniendo llaves de tsup" << endl;
-    vector <Entry> tj_entry = tj->keys;
-    cout << "obteniendo llaves de tj" << endl;
-    if(tsup->is_leaf == true){
-        cout << "tsup es hoja" << endl;
-        for (auto &entry : tsup_entry){
-          int tj_entry_length_leaf = tj->keys.size();
-          if (get<0>(entry.point) == get<0> (pfj) and get<1>(entry.point) == get<1> (pfj)){
-            entry.child = tj;
-            tsup->is_leaf = false;
-          }
-        }
-    }
-    else{
-        cout << "tsup no es hoja" << endl;
-        for (auto &entry : tsup_entry){
-            int tj_entry_length = tj->keys.size();
-            if(get<0>(entry.point) == get<0> (pfj) and get<1>(entry.point) == get<1> (pfj)){
+//void insert_tj_en_tsup(Node* tsup, Node* tj,puntosbd pfj){ 
+    //cout << "Entrando a insert_tj_en_tsup" << endl;
+    //vector<Entry> tsup_entry = tsup->keys;
+    //cout << "obteniendo llaves de tsup" << endl;
+    //vector <Entry> tj_entry = tj->keys;
+    //cout << "obteniendo llaves de tj" << endl;
+    //if(tsup->is_leaf == true){
+        //cout << "tsup es hoja" << endl;
+        //for (auto &entry : tsup_entry){
+          //int tj_entry_length_leaf = tj->keys.size();
+          //if (get<0>(entry.point) == get<0> (pfj) and get<1>(entry.point) == get<1> (pfj)){
+            //cout << "ENCONTRE EL FJ EN TSUP JIJIOSJDFFIFPD" << endl;
+            //entry.child = tj;
+            //tsup->is_leaf = false;
+          //}
+        //}
+    //}
+    //else{
+        //cout << "tsup no es hoja" << endl;
+        //for (auto &entry : tsup_entry){
+            //int tj_entry_length = tj->keys.size();
+            //if(get<0>(entry.point) == get<0> (pfj) and get<1>(entry.point) == get<1> (pfj)){
                 //preguntar si es NULL, le asignamos el hijo 
                 //else hacemos recursión
-                if(entry.child == NULL){
-                    entry.child = tj;
-                }
-                else{
-                    insert_tj_en_tsup(entry.child,tj,pfj); 
-                }
-            }
-        }   
+                //if(entry.child == NULL){
+                   // entry.child = tj;
+                //}
+                //else{
+                    //insert_tj_en_tsup(entry.child,tj,pfj); 
+                //}
+           // }
+       // }   
+    //}
+//}
+//vector de nodos hojas
+vector <Node*> search_leafs(Node* tsup){
+    vector <Node*> leafs;
+    if(tsup->is_leaf == true){
+        leafs.push_back(tsup);
+        return leafs;
+    }
+    else{
+        for (auto &entry : tsup->keys){
+            vector<Node*> tmp = search_leafs(entry.child);
+            leafs.insert(leafs.end(), tmp.begin(), tmp.end());
+        }
+        return leafs; 
     }
 }
+bool insert_tsup(Node* hoja,Node* t_prima,puntosbd pfj){
+    cout << "Entrando a insert_tsup con largo de la llave de la hoja"<<endl;
+    cout << hoja->keys.size()<<endl;
+    for (auto &entrada : hoja->keys){
+        cout << "ENTRANDP EN UNA KEYS DE INSERT T_SUP"<<endl;
+        cout << get<0>(entrada.point)<<endl;
+        if(get<0>(entrada.point) == get<0> (pfj) and get<1>(entrada.point) == get<1> (pfj)){
+            entrada.child = t_prima;
+            //cout << "Lo encontré!"<<endl;
+            return true;
+        }
+    }
+    return false;
+}
+//función que inserta os tjs en tsup
+void insert_all_tjs_en_tsup(vector<Node*>leafs_tsup,vector<Node*> t_prim,vector<puntosbd> pfjs){
+    int t_prim_length = t_prim.size();
+    for (int i = 0; i < t_prim_length;i++){
+        cout << "LARGOOOOOO DE T_PRIM_LENGTHHHHHHHH" <<endl;
+        cout << i <<endl;
+        int t_leafs_length = leafs_tsup.size();
+        for (int j = 0; j < t_leafs_length;j++){
+                cout << j <<endl;
+                cout << "COORDENADA PFJ UUUUUUUUUUUU" <<endl;
+                cout << get<0>(pfjs[i]) <<endl;
+                if (insert_tsup(leafs_tsup[j],t_prim[i],pfjs[i])){
+                    cout << "Lo encontree"<<endl;
+                }
+        }
+    }
+}
+
+
 
 //Paso 11
 //Recibe el puntero a T_sup y reciba la lista de punteros Nodos(trees)
 //aplica la función insert_tj_en_tsup para insertar todos los T_j en T_sup.
-void insert_all_tjs_en_tsup(Node* tsup, vector <Node*> tjs, vector<puntosbd> con_f){
-   cout << "Entrando a insert_all_tjs" << endl;
-   cout << "Entrando a insert_all_tjs CON LAAAAAAAAAAAAAAAAAAARGO" << endl;
+//void insert_all_tjs_en_tsup(Node* tsup, vector <Node*> tjs, vector<puntosbd> con_f){
+   //cout << "Entrando a insert_all_tjs" << endl;
+   //cout << "Entrando a insert_all_tjs CON LAAAAAAAAAAAAAAAAAAARGO" << endl;
    
-   int tjs_length = tjs.size();
-   cout << tjs_length << endl;
+   //int tjs_length = tjs.size();
+   //cout << tjs_length << endl;
    //puntosbd a = tjs[2]->keys[1].point;
    //double x = get<0>(a);
    //double y = get<1>(a);
    //cout <<  x << endl;
    //cout <<  y << endl;
    //for (auto &t_j_s : tjs){
-   for(int i = 0; i < tjs_length;i++){
-     double test = get<0>(tjs[i]->keys[0].point);
-     cout << "Entrando a insert_all_tjs 22222222222" << endl;
-     cout << test << endl;
-     insert_tj_en_tsup(tsup,tjs[i],con_f[i]);
-   } 
-}
+   //for(int i = 0; i < tjs_length;i++){
+     //double test = get<0>(tjs[i]->keys[0].point);
+     //cout << "Entrando a insert_all_tjs 22222222222" << endl;
+     //cout << test << endl;
+     //insert_tj_en_tsup(tsup,tjs[i],con_f[i]);
+   //} 
+//}
 
 double get_max_cr(puntosbd point,Node* sub_tree){
    set <double> cr_s; //cr_s.insert()cr
@@ -436,8 +507,12 @@ Node cp(vector <puntosbd> puntos){
             cout << "Largo del arbol: "<<endl;
             cout << length_arbol_keys <<endl;
             if (tree_T_j[i]->keys.size() < b){
-                 cout << "Entrando al if del paso 7 con: "<< tree_T_j[i]->keys.size()<<""<<endl;
+                cout << "Entrando al if del paso 7 con: "<< tree_T_j[i]->keys.size()<<""<<endl;
                 conjunto_F.erase(conjunto_F.begin() + i); //Eliminamos pf_j de F
+                if(tree_T_j[i]->is_leaf){
+                    cout <<"soy una hoja"<<endl;
+
+                }
                 vector <puntosbd> entries = save_points(tree_T_j[i]->keys);
                 for (auto &new_entrada : entries){   // añadimos puntos al conjunto F
                   cout << "Entrando al primer for del paso 7 "<<endl;
@@ -451,14 +526,21 @@ Node cp(vector <puntosbd> puntos){
                 //  cout << "Entrando al segundo for del paso 7 "<<endl;
                 //  tree_T_j.push_back(new_entr);
                 //}
+                cout << "PRINTEANDO INDICE DESPUES DEL PRIMER FOR DEL PASO 7777777777777 "<<endl;
+                cout << i <<endl;
                 tree_T_j_indexes_elim.push_back(i);     
                 //tree_T_j.erase(tree_T_j.begin() + i); //eliminamos la raíz.
             }
+        }
+        cout << "AYUDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 7777777777777 "<<endl;
+        for (auto &index: tree_T_j_indexes_elim){
+            cout<<index<<endl;
         }
         if(tree_T_j_indexes_elim.empty() == false){
           cout << "Entrando AL IF DE LA LINEA 459 "<<endl;
           for (auto &idx : tree_T_j_indexes_elim){
             for(auto &idtree : tree_T_j[idx]->keys){
+                cout << tree_T_j[idx]->keys.size()<<endl;
                 tree_T_j.push_back(idtree.child);
                 if (idtree.child == NULL){
                     cout << "ARBOL NULOOOOOOOOOOOOOOOOOO AAAAAAAAAAAAAAAAAAAAAAAAAAAA "<<endl;
@@ -479,46 +561,97 @@ Node cp(vector <puntosbd> puntos){
         vector <int> heights;
         cout <<"largo de heigths"<<endl;
         cout<<tree_size<<endl;
-        for (auto &tree : tree_T_j){
-            cout<<"entré al for luego de calcular height"<<endl;
-            int tmp_height = height(tree);
-            cout << tmp_height <<endl;
-            heights.push_back(tmp_height);
-            cout << "paso el push de tmp_heigth"<<endl;
+        //for (auto &tree : tree_T_j){
+          //  cout<<"entré al for luego de calcular height"<<endl;
+            //int tmp_height = height(tree);
+            //cout << tmp_height <<endl;
+            //heights.push_back(tmp_height);
+            //cout << "paso el push de tmp_heigth"<<endl;
+        //}
+        for (auto &sub_tree : tree_T_j){
+            cout<<"ALTURAS DE SUBTREEE:"<<endl;
+            cout<<sub_tree->height<<endl;
+            heights.push_back(sub_tree->height);
         }
+        
+    
         cout<<"sali del for de heights"<<endl;
         auto min_iter = min_element(heights.begin(), heights.end());
         h = *min_iter;
         tree_T_j_length = tree_T_j.size();
         vector <Node*> T_prim;
         cout << "Iniciando paso 9" << endl;
+        cout <<"nuevo"<<endl;
+        cout <<"altura: "<<h<<""<<endl;
         for (int j = 0; j < tree_T_j_length; j++){ // Punto 9
            //cout << "ENTRAMOS FOR PASO 9 VEAMOS EL LARGO DE LISTA TREE_T_J" << endl;
            //cout << tree_T_j_length << endl;
            if(tree_T_j[j]->height == h){
+             cout << "ALTURA IGUAL A H PARA EL PASO 9" << endl;
              T_prim.push_back(tree_T_j[j]);
            }
            else{
+             cout<<"ALTURA NO ES IGUAL A H PASO 9"<<endl;
+             if(tree_T_j[j] == NULL){
+                cout<<"PASO 9 NULO MI PANA"<<endl;
+
+             }
              conjunto_F.erase(conjunto_F.begin() + j); //eliminamos el punto pertinente en F
-             Node* sub_node_h = search_h_height(tree_T_j[j],tree_T_j[j]->height,h);
-             vector <Entry> sub_node_h_entries = sub_node_h->keys;
-             for (auto &sub_nod_entr : sub_node_h_entries){ //añadimos los sub arboles a tree_T_j
-                  cout << "FOR ANIDADO PASO 9" << endl;
-                  conjunto_F.push_back(sub_nod_entr.point);
-                  tree_T_j.push_back(sub_nod_entr.child);
-             }     
+             //Node* sub_node_h = search_h_height(tree_T_j[j],tree_T_j[j]->height,h);//
+             cout<<"MI cr I ES:"<<tree_T_j[j]->height<<endl;
+             puntosbd dummy = make_tuple(0.0,0.0);
+             tuple<vector <Node*>,vector<puntosbd>> sub_nodes_h = search_h_height(tree_T_j[j],tree_T_j[j]->height,h,dummy);
+             //vector <Entry> sub_node_h_entries = sub_node_h->keys;
+             int general_length = get<0>(sub_nodes_h).size();
+             for (int i = 0; i<general_length;i++){
+                T_prim.push_back(get<0>(sub_nodes_h)[i]);
+                conjunto_F.push_back(get<1>(sub_nodes_h)[i]);
+             }
+             //for (auto &sub_nod_entr : sub_node_h_entries){ //añadimos los sub arboles a tree_T_j
+             //     cout << "FOR ANIDADO PASO 9" << endl;
+              //    conjunto_F.push_back(sub_nod_entr.point);
+                  //tree_T_j.push_back(sub_nod_entr.child);
+             //}     
            }
         }
         Node t_sup = cp(conjunto_F); 
         cout << "Iniciando paso 11" << endl;
         int con_f_len = conjunto_F.size();
-        int subtreees_len = tree_T_j.size();
+        int subtreees_len = T_prim.size();
         cout << "Largo de conjunto F final: (" << con_f_len << ")" << endl;
-        cout << "Largo de tree T j final: (" << subtreees_len << ")" << endl;
-        insert_all_tjs_en_tsup(&t_sup,tree_T_j,conjunto_F); //paso 11 algoritmo cp
+        cout << "Largo de T prima final: (" << subtreees_len << ")" << endl;
+        //insert_all_tjs_en_tsup(&t_sup,T_prim,conjunto_F); //paso 11 algoritmo cp
+        cout << "PRINTEANDO ENTRADAS T_SUP"<<endl;
+        for(auto &entrada : t_sup.keys){
+            double new_coor_x = get<0>(entrada.point);
+            double new_coor_y = get<1>(entrada.point);
+            cout << "Coordenadas de las entradas: (" << new_coor_x << ", " << new_coor_y<< ")" << endl;
+            
+        }
+        cout << "PRINTEANDO PUNTOS DE CONJUNTO_F"<<endl;
+        for(auto &fs : conjunto_F){
+            double coor_x = get<0>(fs);
+            double coor_y = get<1>(fs);
+            cout << "Las coordenadas de los puntos de conjunto_F: (" << coor_x << ", " << coor_y<< ")" << endl;
+            
+        }
+        cout <<"PRINTEANDO ENTRADAS DE T_PRIM"<<endl;
+         for(auto &l : T_prim){
+            if(l == NULL){
+                cout <<"HAY UN NULL EN LA LISTA DE T PRIMAAAAAAAAAAAAAS"<<endl;
+            }
+            
+        }
+
+        vector<Node*> hojas_tsup = search_leafs(&t_sup);
+        cout <<"TOY CANSAO JEFE"<<endl;
+        cout << hojas_tsup.size()<<endl;
+        insert_all_tjs_en_tsup(hojas_tsup,T_prim,conjunto_F);
+        
         cout << "Iniciando paso 12" << endl;
         //set_cr(&t_sup); //paso 12
         cout << "finish"<<endl;
+        t_sup.height = h+1;   
         return t_sup;
     }
 }
@@ -592,7 +725,7 @@ int main(){
     tree_ptr->is_leaf = false;
     tree_ptr->keys = EntryTree;
     //cout << "voy a imprimir height"<< endl;
-    cout << height(tree_ptr)<< endl;
+    //cout << height(tree_ptr)<< endl;
     //cout << height(tree1_ptr)<<endl;
 
     Node tree_test = cp(puntos);
