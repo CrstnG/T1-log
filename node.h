@@ -35,7 +35,9 @@ struct Node{
 /**
  * @struct Entry
  * @brief Representa una entrada en un nodo de un árbol de datos.
- *
+ * @param point Punto en un espacio bidimensional.
+ * @param cr Radio cobertor.
+ * @param child Puntero al nodo hijo.
  * Una entrada contiene información sobre un punto en un espacio bidimensional,
  * así como un valor asociado (`cr`) y un puntero a un nodo hijo.
  */
@@ -44,6 +46,20 @@ struct Entry{
   double cr; // radio cobertor
   Node* child; // puntero al nodo hijo
 };
+
+double euc_distance(const puntosbd& p1, const puntosbd& p2) {
+    // Obtener las coordenadas x e y de cada punto
+    double x1, y1, x2, y2;
+    std::tie(x1, y1) = p1;
+    std::tie(x2, y2) = p2;
+
+    // Calcular las diferencias en las coordenadas
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+
+    // Calcular la distancia euclidiana
+    return std::sqrt(dx * dx + dy * dy);
+}
 
 
 
