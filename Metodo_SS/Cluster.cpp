@@ -1,23 +1,82 @@
 #include "../node.h"
-#include <tuple>
-#include <vector>
-#include <iostream>
-#include <algorithm>
-#include <set>
-#include <array>
-#include <random>
-#include <map>
-#include <cmath>
-using namespace std;
+#include "../aux_functions.cpp"
 
-// Funciones auxiliares:
 
-// Función para calcular la distancia euclidiana entre dos puntos
-double euc_distance_alternative(const puntosbd& p1, const puntosbd& p2) {
-    double dx = get<0>(p1) - get<0>(p2);
-    double dy = get<1>(p1) - get<0>(p2);
-    return sqrt(dx * dx + dy * dy);
-}
+class Cluster {
+    public:
+        std:: vector <puntosbd> clusterPoints; // Puntos del cluster
+        puntosbd medoide; // Medoide del cluster
+
+        // Constructor por defecto
+        Cluster() {}
+
+        // Constructor con parámetros
+        Cluster(const puntosbd& _medoide, const std::vector<puntosbd>& _clusterPoints) : medoide(_medoide), clusterPoints(_clusterPoints) {}
+
+        // Métodos de la clase
+
+        // 1. Añadir un punto al Cluster
+        void addPoint(const puntosbd& p) {
+            clusterPoints.push_back(p);
+        }
+
+        // 2. Calcular el medoide del Cluster
+        void calcularMedoide() {
+            if (clusterPoints.empty()) {
+                // Si no hay puntos en el cluster, no hay nada que calcular
+                return;
+            }
+
+            // Variables para almacenar el mejor medoide encontrado y la distancia mínima total
+            double minDistanciaTotal = std::numeric_limits<double>::infinity();
+            puntosbd mejorMedoide;
+
+            // Calcular la distancia total de cada punto a los demás
+            for (const auto& punto1 : clusterPoints) {
+                double distanciaTotal = 0.0;
+                for (const auto& punto2 : clusterPoints) {
+                    if (punto1 != punto2) {
+                        // Calcular la distancia euclidiana entre punto1 y punto2
+                        double distancia = euc_distance(punto1, punto2);
+                    }
+                }
+
+                // Actualizar el mejor medoide si se encuentra una distancia total menor
+                if (distanciaTotal < minDistanciaTotal) {
+                    minDistanciaTotal = distanciaTotal;
+                    mejorMedoide = punto1;
+                }
+            }
+
+            // Asignar el mejor medoide encontrado a la variable de clase
+            medoide = mejorMedoide;
+        }
+
+        // 3. Calcular el máximo radio cobertor del Cluster
+        double maxRadioCluster() {
+            if (clusterPoints.empty()) {
+                // Si no hay puntos en el cluster, el máximo radio es 0
+                return 0.0;
+            }
+
+            double maxRadio = 0.0;
+
+            // Iterar sobre cada par de puntos en el cluster
+            for (size_t i = 0; i < clusterPoints.size() - 1; ++i) {
+                for (size_t j = i + 1; j < clusterPoints.size(); ++j) {
+                    // Calcular la distancia entre clusterPoints[i] y clusterPoints[j] usando euc_distance
+                    double distancia = euc_distance(clusterPoints[i], clusterPoints[j]);
+
+                    // Actualizar el máximo radio si se encuentra una distancia mayor
+                    maxRadio = std::max(maxRadio, distancia);
+                }
+            }
+
+            // Retornar el máximo radio cobertor del cluster
+            return maxRadio;
+        }
+};
+
 
 // Primera función: encontrarParesMasCercanos
 /**
@@ -31,7 +90,7 @@ std::pair<size_t, size_t> encontrarParesMasCercanos(const std::vector<std::vecto
     // Iteramos a través de todos los clusters para encontrar el par más cercano
     for (size_t i = 0; i < C.size(); ++i) {
         for (size_t j = i + 1; j < C.size(); ++j) {
-            double dist = euc_distance_alternative(C[i][0], C[j][0]); // Calcula la distancia entre los medoides
+            double dist = euc_distance(C[i][0], C[j][0]); // Calcula la distancia entre los medoides
             if (dist < minDistancia) {
                 minDistancia = dist;
                 parMasCercano = {i, j};
@@ -58,7 +117,7 @@ size_t encontrarVecinoMasCercano(const std::vector<puntosbd>& c, const std::vect
     size_t indiceVecino = 0;
     
     for (size_t i = 0; i < Cout.size(); ++i) {
-        double dist = euc_distance_alternative(c[0], Cout[i][0]);
+        double dist = euc_distance(c[0], Cout[i][0]);
         if (dist < minDistancia) {
             minDistancia = dist;
             indiceVecino = i;
