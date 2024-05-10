@@ -1,14 +1,4 @@
 #include "../node.h"
-#include <tuple>
-#include <vector>
-#include <iostream>
-#include <algorithm>
-#include <set>
-#include <array>
-#include <random>
-#include <memory>
-#include <map>
-#include <cmath>
 
 // Incluimos funciones auxiliares
 #include "Cluster.cpp"
