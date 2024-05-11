@@ -8,24 +8,29 @@ typedef tuple <double, double>puntosbd;
 //typedef tuple <puntosbd, double, Node *> entry;
 
 struct Entry;
-
-typedef struct node{
-  vector<Entry> keys;
-  bool is_leaf = false;
-  int height = 0;
-}Node;
-
+struct Node;
 struct Entry{
   puntosbd point;
   double cr;
   Node* child;
 };
+struct Node{
+  vector<Entry> keys;
+  bool is_leaf = false;
+  int height (){return search_height(keys);}
+  
+  int search_height (vector<Entry> keys){
+     int actual_height = 0;
+     for (auto &entrada: keys){
+          if (entrada.child != NULL)
+          {
+            actual_height = max(actual_height,1 + search_height(entrada.child->keys));
+          }  
+     }
+     return actual_height;
+  }
+};
 
-//struct Node{
-  //vector<Entry> keys;
-  //bool is_leaf = false;
-  //int height = 0;
-//};
 
 
 

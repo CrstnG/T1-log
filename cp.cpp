@@ -650,7 +650,7 @@ Node cp(vector <puntosbd> puntos){
 
 int main(){
     cout << B << endl;
-    int N = pow(2,15);
+    int N = pow(2,10);
     
     vector<puntosbd> puntos = generarPuntosAleatoriosUnicos(N);
     //cout << "cree los puntos" << endl;
