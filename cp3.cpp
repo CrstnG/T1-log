@@ -145,7 +145,7 @@ map <puntosbd, vector<puntosbd>> redistribution(vector <puntosbd> puntos){
 vector <puntosbd> get_F(map <puntosbd, vector<puntosbd>> k_sets){
    vector <puntosbd> rd_points;
    for (auto &par : k_sets){
-      //cout << "Las coordenadas en get_f son: (" << get<0>(par.first) << ", " << get<1>(par.first) << ")" << endl;
+      //
       rd_points.push_back(par.first);
    }
    return rd_points;
@@ -277,16 +277,19 @@ double get_max_cr(puntosbd point,Node* sub_tree){
 
 //Recibe un árbol con radios covertores = 0.
 //Setea los radios covertores según corresponda.
-void set_cr(Node* t_sup){
-    //cout << "Entré a set_cr"<<endl;
-    if(t_sup->height()){
-        return;
+void set_cr(Node* mtree) {
+    if (mtree->height() == 0) {
+        return; // No hacer nada si la altura es 0
     }
-    else{
-        //por cada entrada de las entradas (keys) de t_sup
-        for (auto &entry : t_sup->keys){
-            //cout << " cada entrada de las entradas (keys) de t_sup" << endl;
-            entry.cr = get_max_cr(entry.point,entry.child);
+
+    for (auto &entry : mtree->keys) {
+        if (entry.child != nullptr) {
+            set_cr(entry.child); // Llamada recursiva para establecer cr en los nodos hijos
+            entry.cr = numeric_limits<double>::min(); // Inicializar con el menor valor posible
+            for (const auto &child_entry : entry.child->keys) {
+                double dist = euc_distance(entry.point, child_entry.point);
+                entry.cr = max(entry.cr, dist); // Actualizar cr con el mayor valor encontrado
+            }
         }
     }
 }
@@ -529,40 +532,4 @@ Node* cp(vector <puntosbd> puntos){
 }
 
 
-int main(){
-    cout << B << endl;
-    int N = pow(2,25);
-    
-    vector<puntosbd> puntos = generarPuntosAleatoriosUnicos(N);
-    
 
-    cout << "INICIA EL ARBOL EN MAIN"<<endl;
-    int suma=0;
-    Node* tree_test = new Node;
-    tree_test = cp(puntos);
-    cout <<"MI ALTURA DE ARBOL TEST ES:"<<endl;
-    cout << tree_test->height() <<endl;
-    //cout <<"ALTURAS DE MIS ENTRADAS"<<endl;
-    //for (auto &entry : tree_test->keys){
-       // for (auto &entrada: entry.child->keys){
-           // suma+= entrada.child->keys.size();
-        //}
-		//cout <<"FINALIZO ALTURAS"<<endl;s
-		//cout << entry.child->keys.size() <<endl;
-		//cout << entry.child->keys[0].child->keys.size() <<endl;
-		//cout <<"next"<<endl;
-		//}	
-	//cout <<"THE END"<<endl;
-    //cout <<suma<<endl;
-	
-    //cout<< tree_test.height << endl;
-    //map <puntosbd, vector<puntosbd>> redist= redistribution2(puntos);
-    //delete tree_test;
-    //cout<<tree_test->height()<<endl;
-    cout<<tree_test->keys.size()<<endl;
-    //int total =0;
-    
-    cout <<"FINISH CTM"<<endl;
-    
-    return 0;  
-}

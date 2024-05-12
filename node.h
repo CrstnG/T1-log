@@ -16,6 +16,15 @@ struct Entry{
   Node* child;
 };
 
+struct Query {
+    // Atributos de la estructura Query
+    puntosbd punto;
+    double radio;
+    // Constructor de la estructura Query
+    Query(puntosbd _punto, double _radio) : punto(_punto), radio(_radio) {}
+};
+
+
 struct Node{
   vector<Entry> keys;
   //bool is_leaf = false;
