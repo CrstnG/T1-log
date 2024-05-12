@@ -40,7 +40,7 @@ vector<puntosbd> generarPuntosAleatoriosUnicos(int N) {
 
 
 
-int B = 4096/(sizeof(Entry)+sizeof(bool)+sizeof(int));
+int B = 4096/(sizeof(Entry)+sizeof(int)); //113
 
 double euc_distance(const puntosbd& p1, const puntosbd& p2) {
     double dx = get<0>(p1) - get<0>(p2);
@@ -48,17 +48,6 @@ double euc_distance(const puntosbd& p1, const puntosbd& p2) {
     return sqrt(dx * dx + dy * dy);
 }
 
-//Transforma los puntos a entradas y retorna un nodo
-Node to_node(vector <puntosbd> points){
-    Node n;
-    for (int i=0;i < points.size();i++){
-        puntosbd v = points[i];
-        Entry e = {v,0.0,NULL};
-        n.keys.push_back(e);
-        //n.is_leaf = true;
-    }
-    return n;
-}
 // Retorna un vector con k tuplas random
 vector <puntosbd> random_p(vector <puntosbd> p,int k){
     vector <puntosbd> k_random;
@@ -105,7 +94,7 @@ map <puntosbd, vector<puntosbd>> point_assign(vector<puntosbd> rand_points, vect
 //Función de redistribución paso 4.
 map <puntosbd, vector<puntosbd>> redistribution(vector <puntosbd> puntos){
     cout << "inicia función de redistribución"<<endl;
-    int b = 0.5*B;
+    int b = 0.5*B; //56.5
     int n = puntos.size();
     cout << "largo de entrada:"<<endl;
     cout << n << endl;
@@ -162,39 +151,25 @@ vector <puntosbd> get_F(map <puntosbd, vector<puntosbd>> k_sets){
    return rd_points;
 }
 
-//Función que guarda los puntos, recibe un connjunto de entrys. Rescata los  puntosbd de cada
-//entry y los guarda en el vector points.
-//Se usa en el punto 7.
-vector <puntosbd> save_points(vector<Entry> entries){
-  vector <puntosbd> points;
-  //int entries_length = entries.size();
-  for (const auto &entradas : entries){
-    points.push_back(entradas.point);
-  }
-  return points;
-}
-//Función que guarda los arboles hijos, recibe un conjunto de entrys.
-//Rescata los punteros de los aárboles hijos de cada entry y los guarda en el vector ptr_trees
-vector <Node*> save_treesptr(vector<Entry> entries){
-  vector <Node*> ptr_trees;
-  //int entries_length = entries.size();
-  for (auto &entradas : entries){
-    ptr_trees.push_back(entradas.child);
-  }
-  return ptr_trees;
-}
-
 //funcion que busca el sub-árbol con altura h
 //recibe un puntero a un tree con una altura inicial j, y va  bajando en el árbol hasta encontrar con 
 //un sub-árbol de altura h.
 tuple<vector <Node*>,vector<puntosbd>> search_h_height(Node* tree,int j,int h,puntosbd p_padre){
     cout << "ENTRANDO A SEARCH_H_HEIGHT" << endl;
+    cout<<"Los puntos del p_padre son:  (" << get<0>(p_padre) << ", " << get<1>(p_padre) << ")" << endl;
+    cout << j << endl;
+    for(auto entrada: tree->keys){
+        cout<<"Los puntos de las entradas de p_padre  (" << get<0>(entrada.point) << ", " << get<1>(entrada.point) << ")" << endl;
+    }
     cout << j << endl;
     vector <Node*> tree_h;
     vector <puntosbd> f_add;
     if (j == h){
         cout << "ENTRANDO A SEARCH_H_HEIGHT CASO BASE" << endl;
         cout << j << endl;
+        if(tree->keys[0].child ==nullptr){
+            cout << "Hijo de uno de los insertados es NULLPTR" << endl;
+        }
         f_add.push_back(p_padre);
         tree_h.push_back(tree);
         for (int i = 0; i<f_add.size(); i++){
@@ -208,7 +183,7 @@ tuple<vector <Node*>,vector<puntosbd>> search_h_height(Node* tree,int j,int h,pu
         cout << j << endl;
         for (auto &entries: tree->keys){
             //tree_h.push_back(search_h_height(entries.child,j-1,h));
-            tuple<vector <Node*>,vector<puntosbd>>  search_child = search_h_height(entries.child,j-1,h,entries.point);
+            tuple<vector <Node*>,vector<puntosbd>>  search_child = search_h_height(entries.child,entries.child->height(),h,entries.point);
 
             tree_h.insert(tree_h.end(),get<0>(search_child).begin(), get<0>(search_child).end());
             f_add.insert(f_add.end(),get<1>(search_child).begin(), get<1>(search_child).end());
@@ -247,9 +222,6 @@ bool insert_tsup(Node* hoja,Node* t_prima,puntosbd pfj){
             cout << "Altura de T_PRIMA"<<endl;
             cout << t_prima->height()<<endl;
             entrada.child = t_prima;
-            //hoja->is_leaf = false;
-            
-            //cout << "Lo encontré!"<<endl;
             return true;
         }
     }
@@ -269,7 +241,7 @@ void insert_all_tjs_en_tsup(vector<Node*>leafs_tsup,vector<Node*> t_prim,vector<
                 cout << get<0>(pfjs[i]) <<endl;
                 if (insert_tsup(leafs_tsup[j],t_prim[i],pfjs[i])){
                     s++;
-                    if(t_prim[i]==NULL){
+                    if(t_prim[i] == nullptr){
                         cout << "Estoy insertando un nulo"<<endl;
                     }
                     cout << "Lo encontree"<<endl;
@@ -355,14 +327,26 @@ Node* cp(vector <puntosbd> puntos){
     if (n <= B){
         // retornar un arbol(NODE) con los puntos transformados como atributo.
         cout << "LLegando al caso base" << endl;
+        Node n;
+        for (int i=0;i < puntos.size();i++){
+          puntosbd v = puntos[i];
+          Entry e = {v,0.0,nullptr};
+          n.keys.push_back(e);
+        }
         Node* t_ptr = new Node;
-        *t_ptr = to_node(puntos);
+        *t_ptr = n;
         return t_ptr;
     }
     else{
         //cout << "haciendo redistribucion" << endl;
         map <puntosbd, vector<puntosbd>> conjuntos_k = redistribution(puntos);
-        //cout << "redistribución temrinada" << endl;
+        int sum =0;
+        for(auto &llave :conjuntos_k){
+            sum = sum + llave.second.size();
+        }
+        cout <<"PUNTOS TOTALES EN REDISTRIBUCION: " <<sum<< endl;
+        cout <<"PUNTOS TOTALES: "<<puntos.size()<<endl;
+        //cout << "redistribución terminada" << endl;
         int conjuntos_k_length = conjuntos_k.size();
         //cout << "Largo antes del while;" << endl;
         cout << conjuntos_k_length << endl;
@@ -376,8 +360,7 @@ Node* cp(vector <puntosbd> puntos){
         cout << "obtencion lista" << endl;
         vector <Node*> tree_T_j;
         int conjuntof_length = conjunto_F.size();
-        for(int g = 0; g < conjuntof_length; g++){
-                      //paso 6
+        for(int g = 0; g < conjuntof_length; g++){ //paso 6
             cout << "comenzando recursion para obtener T_j" << endl;
             Node* tmp_node = new Node;
             tmp_node = cp(conjuntos_k[conjunto_F[g]]);
@@ -408,6 +391,9 @@ Node* cp(vector <puntosbd> puntos){
         for (auto &index: tree_T_j_indexes_elim){
             cout<<index<<endl;
         }
+        //pushear hijos 1 2 3 4 5 6 7     2 3 5
+        //              1 2 4 5 6 7        -1
+        //              1 2 5 6 7          -2
         if(tree_T_j_indexes_elim.empty() == false){ ///
           cout << "Printeando cantidad de entradas del arbol a eliminar: "<<endl;
           for (auto &idx : tree_T_j_indexes_elim){
@@ -417,7 +403,7 @@ Node* cp(vector <puntosbd> puntos){
                 }
                 cout << tree_T_j[idx]->keys.size()<<endl;
                 //cout << "altura del childdddd"<<endl; //
-                if (idtree.child == NULL){
+                if (idtree.child == nullptr){
                     cout << "ARBOL NULO al tratar de agregar el child en tree_T_j "<<endl;
                     cout <<"MI ALTURA ES: "<<tree_T_j[idx]->height()<<""<<endl;
                     cout <<"MI CANTIDAD DE ENTRADAS ES : "<<tree_T_j[idx]->keys.size()<<""<<endl;
@@ -427,9 +413,14 @@ Node* cp(vector <puntosbd> puntos){
                 tree_T_j.push_back(idtree.child);
             }
           }
-          for (auto &idx : tree_T_j_indexes_elim){
-            tree_T_j.erase(tree_T_j.begin() + idx);
-           }
+          //for (auto &idx : tree_T_j_indexes_elim){
+            //tree_T_j.erase(tree_T_j.begin() + idx);
+           //}
+        }
+        int cont = 0;             
+        for (auto &idx : tree_T_j_indexes_elim){
+            tree_T_j.erase(tree_T_j.begin() + idx - cont);
+            cont++;
         }
         cout << "terminando paso 7" << endl;
         int tree_size = tree_T_j.size();
@@ -443,7 +434,11 @@ Node* cp(vector <puntosbd> puntos){
         cout<<tree_size<<endl;
         for (auto &sub_tree : tree_T_j){
             cout<<"ALTURAS DE SUBTREE:"<<endl;
-            cout<<sub_tree->height()<<endl;
+            if(sub_tree == nullptr){
+                cout<<"NULL DE LA LINEA 438"<<endl;
+            }
+            //cout<<sub_tree->height()<<endl
+
             heights.push_back(sub_tree->height());
         }
         
@@ -457,14 +452,33 @@ Node* cp(vector <puntosbd> puntos){
         }
         //auto min_iter = min_element(heights.begin(), heights.end());
         //h = *min_iter;
+        cout <<"SAMPLES DE F ANTES DE PASO 9"<<endl;
+        for (auto &sample: conjunto_F){
+            double new_coor_x = get<0>(sample);
+            double new_coor_y = get<1>(sample);
+            cout << "CONJUNTO F ANTES DEL PASO 9: (" << new_coor_x << ", " << new_coor_y<< ")" << endl;
+        }
+        for (auto &key: tree_T_j){
+            cout << key->keys.size()<<endl;
+        }
         tree_T_j_length = tree_T_j.size();
         vector <Node*> T_prim;
         cout << "Iniciando paso 9" << endl;
         cout <<"nuevo"<<endl;
         cout <<"altura minima h es: "<<h<<""<<endl;
+        vector <puntosbd> copy_conjunto_F = conjunto_F;
+        cout <<"PRINTEANDO TODOS LOS PUNTOS DE CADA TREE_T_J "<<h<<""<<endl;
+        for (auto &t_j: tree_T_j) {
+         for(auto &p_t_j: t_j->keys){
+              double new_coor6_x = get<0>(p_t_j.point);
+              double new_coor6_y = get<1>(p_t_j.point);
+              cout << "TREE_T_J POINTS: (" << new_coor6_x << ", " << new_coor6_y<< ")" << endl;
+        }
+        }
         for (int j = 0; j < tree_T_j_length; j++){ // Punto 9
            //cout << "ENTRAMOS FOR PASO 9 VEAMOS EL LARGO DE LISTA TREE_T_J" << endl;
-           //cout << tree_T_j_length << endl;
+           //cout << tree_T_j_length << endl
+
            cout<<"MI height en I ES:"<<tree_T_j[j]->height()<<endl;
            if(tree_T_j[j]->height() == h){
              cout << "ALTURA IGUAL A H PARA EL PASO 9" << endl;
@@ -472,35 +486,55 @@ Node* cp(vector <puntosbd> puntos){
            }
            else{
              cout<<"ALTURA NO ES IGUAL A H PASO 9"<<endl;
-             if(tree_T_j[j] == NULL){
+             if(tree_T_j[j] == nullptr){
                 cout<<"PASO 9 NULO MI PANA"<<endl;
 
              }
              //conjunto_F.erase(conjunto_F.begin() + j); //eliminamos el punto pertinente en F
              //Node* sub_node_h = search_h_height(tree_T_j[j],tree_T_j[j]->height,h);//
              
-             puntosbd padre = conjunto_F[j];
+             puntosbd padre = copy_conjunto_F[j];
+             cout << "CONJUNTO F ANTES DEL ERASE: " << conjunto_F.size()<<endl;
+             double new_coor4_x = get<0>(conjunto_F[j]);
+             double new_coor4_y = get<1>(conjunto_F[j]);
+             cout << "Punto a eliminar en iteracion DEL PASO 9: (" << new_coor4_x << ", " << new_coor4_y<< ")" << endl;
              conjunto_F.erase(conjunto_F.begin() + j); //eliminamos el punto pertinente en F
+             cout << "CONJUNTO F DESPUES DEL ERASE: " << conjunto_F.size()<<endl;
+             for (auto &pts : conjunto_F){
+                double new_coor3_x = get<0>(pts);
+                double new_coor3_y = get<1>(pts);
+                cout << "Puntos post erase: (" << new_coor3_x << ", " << new_coor3_y<< ")" << endl;
+            }
              tuple<vector <Node*>,vector<puntosbd>> sub_nodes_h = search_h_height(tree_T_j[j],tree_T_j[j]->height(),h,padre);
-             cout<<"VERIFICAR ALTURAS"<<endl;
-             for (auto &alt_fin : get<0>(sub_nodes_h)){
-                if (alt_fin->height() != h){
-                    cout<<"ERRORRRR"<<endl;
-                }
-                else{
-                    cout<<"IGUAL A HHH"<<endl;
-                }
-             }
              //vector <Entry> sub_node_h_entries = sub_node_h->keys;
+             for (auto puntos_add : get<1>(sub_nodes_h)){
+                double new_coor3_x = get<0>(puntos_add);
+                double new_coor3_y = get<1>(puntos_add);
+                cout << "Puntos a añadir en cada iteracion DEL PASO 9: (" << new_coor3_x << ", " << new_coor3_y<< ")" << endl;
+            }
              int general_length = get<0>(sub_nodes_h).size();
              for (int i = 0; i<general_length;i++){
-                if(get<0>(sub_nodes_h)[i]==NULL){
+                if(get<0>(sub_nodes_h)[i] == nullptr){
                     cout<<"EN EL PASO 9 HAY T_PRIMA NULO"<<endl;
                 }
                 T_prim.push_back(get<0>(sub_nodes_h)[i]);
+                for (auto new_F : conjunto_F){
+                    if (new_F == get<1>(sub_nodes_h)[i]){
+                        cout <<"REPETIDO"<<endl;
+                    }
+                }
                 conjunto_F.push_back(get<1>(sub_nodes_h)[i]);
+                //T_prim.push_back(get<0>(sub_nodes_h)[i]);
              }   
            }
+        }
+        for (auto &punt : conjunto_F){
+            double new_coor2_x = get<0>(punt);
+            double new_coor2_y = get<1>(punt);
+            cout << "CONJUNTO F DESPUES DEL PASO 9: (" << new_coor2_x << ", " << new_coor2_y<< ")" << endl;
+        }
+        for (auto &key: T_prim){
+            cout << key->keys.size()<<endl;
         }
         Node* t_sup = new Node;
         t_sup =  cp(conjunto_F);
@@ -526,18 +560,38 @@ Node* cp(vector <puntosbd> puntos){
         }
         cout <<"PRINTEANDO ENTRADAS DE T_PRIM"<<endl;
          for(auto &l : T_prim){
-            if(l == NULL){
+            if(l == nullptr){
                 cout <<"HAY UN NULL EN LA LISTA DE T PRIMAAAAAAAAAAAAAS"<<endl;
             }
             
         }
-        
         vector<Node*> hojas_tsup = search_leafs(t_sup);
         cout <<"TOY CANSAO JEFE"<<endl;
         cout << hojas_tsup.size()<<endl;
         insert_all_tjs_en_tsup(hojas_tsup,T_prim,conjunto_F);
         cout << "Iniciando paso 12" << endl;
         //set_cr(&t_sup); //paso 12
+        cout << "finish"<<endl; 
+        for (auto &key : t_sup->keys){
+            if(key.child == nullptr){
+        //cout<< key.child->keys.size() <<endl;
+        //cout<<"Coordenada x"<<endl;
+        //cout<< get<0>(key.point) <<endl;
+        //cout<<"Coordenada y"<<endl;
+        //cout<< get<1>(key.point) <<endl;
+                cout<<"SOY NULO"<<endl;
+    
+        }
+        else{
+            cout<< key.child->keys.size() <<endl;
+            cout<<"Coordenada x"<<endl;
+            cout<< get<0>(key.point) <<endl;
+            cout<<"Coordenada y"<<endl;
+            cout<< get<1>(key.point) <<endl;
+        //total +=key.child->keys.size();
+            cout<<"NO SOY NULO"<<endl;
+	    }
+        }
         cout << "finish"<<endl; 
         return t_sup;
     }
@@ -546,14 +600,56 @@ Node* cp(vector <puntosbd> puntos){
 
 int main(){
     cout << B << endl;
-    int N = pow(2,15);
+    int N = pow(2,17);
     
     vector<puntosbd> puntos = generarPuntosAleatoriosUnicos(N);
     
+
     cout << "INICIA EL ARBOL EN MAIN"<<endl;
-    Node* tree_test = cp(puntos);
+    int suma=0;
+    Node* tree_test = new Node;
+    tree_test = cp(puntos);
+    cout <<"MI ALTURA DE ARBOL TEST ES:"<<endl;
+    cout << tree_test->height() <<endl;
+    cout <<"ALTURAS DE MIS ENTRADAS"<<endl;
+    //for (auto &entry : tree_test->keys){
+       // for (auto &entrada: entry.child->keys){
+           // suma+= entrada.child->keys.size();
+        //}
+		//cout <<"FINALIZO ALTURAS"<<endl;s
+		//cout << entry.child->keys.size() <<endl;
+		//cout << entry.child->keys[0].child->keys.size() <<endl;
+		//cout <<"next"<<endl;
+		//}	
+	cout <<"THE END"<<endl;
+    cout <<suma<<endl;
+	
     //cout<< tree_test.height << endl;
     //map <puntosbd, vector<puntosbd>> redist= redistribution2(puntos);
-    delete tree_test;
+    //delete tree_test;
+    cout<<tree_test->height()<<endl;
+    cout<<tree_test->keys.size()<<endl;
+    //int total =0;
+    for (auto &key : tree_test->keys){
+     if(key.child == nullptr){
+        //cout<< key.child->keys.size() <<endl;
+        //cout<<"Coordenada x"<<endl;
+        //cout<< get<0>(key.point) <<endl;
+        //cout<<"Coordenada y"<<endl;
+        //cout<< get<1>(key.point) <<endl;
+        cout<<"SOY NULO"<<endl;
+    
+     }
+     else{
+        cout<< key.child->keys.size() <<endl;
+        cout<<"Coordenada x"<<endl;
+        cout<< get<0>(key.point) <<endl;
+        cout<<"Coordenada y"<<endl;
+        cout<< get<1>(key.point) <<endl;
+        //total +=key.child->keys.size();
+        cout<<"NO SOY NULO"<<endl;
+	 }
+    }
+    
     return 0;  
 }
